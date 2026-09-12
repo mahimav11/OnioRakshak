@@ -3,3 +3,5 @@ numpy
 scikit-learn
 joblib
 appwrite
+matplotlib
+seaborn
