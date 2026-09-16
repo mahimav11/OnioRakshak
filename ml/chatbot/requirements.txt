@@ -1,0 +1,9 @@
+pandas
+numpy
+scikit-learn
+joblib
+appwrite
+google-genai
+python-dotenv
+gtts
+faiss-cpu
