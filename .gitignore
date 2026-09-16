@@ -217,3 +217,5 @@ __marimo__/
 # Streamlit
 .streamlit/secrets.toml
 onio-chatbot-env/
+*.faiss
+onion_kb_metadata.json
