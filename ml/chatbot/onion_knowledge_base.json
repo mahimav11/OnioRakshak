@@ -1,0 +1,52 @@
+[
+  {
+    "id": "storage_conditions",
+    "topic": "Ideal Storage Conditions",
+    "text": "Onions store best in cool, dry, well-ventilated conditions. For long-term cold storage, 0-4 degrees Celsius with 65-70% relative humidity is ideal. For ambient/traditional storage (more common for Indian farmers without cold storage access), temperatures up to 25-30 degrees Celsius are workable as long as ventilation is strong and humidity stays below 65-70%. High humidity is the single biggest driver of rot and sprouting, more so than temperature alone. Onions should be well-cured (outer skins dried) for 1-2 weeks before storage, since uncured onions spoil much faster."
+  },
+  {
+    "id": "curing_process",
+    "topic": "Curing Onions Before Storage",
+    "text": "Curing is the process of drying onions after harvest so the outer skins and necks dry out fully, sealing the bulb against moisture loss and pathogen entry. Traditionally done by leaving harvested onions in the field or a shaded, ventilated area for 1-3 weeks depending on climate. Well-cured onions have papery, tight outer skins and a fully dried, closed neck. Poorly cured onions have a much shorter shelf life regardless of storage conditions, since the open neck is a direct entry point for rot-causing fungi and bacteria."
+  },
+  {
+    "id": "common_diseases",
+    "topic": "Common Onion Diseases and Pests",
+    "text": "Purple blotch (caused by the fungus Alternaria porri) causes purplish lesions on leaves and is common in humid conditions, reducing bulb size and storage quality. Basal rot (Fusarium oxysporum) attacks the root plate and causes bulbs to rot from the base, often not visible until storage. Neck rot (Botrytis species) enters through the neck, especially in poorly cured onions, and causes soft, watery rot during storage. Thrips (Thrips tabaci) are the most damaging insect pest, feeding on leaves and reducing yield and bulb quality, and are also a vector for Iris Yellow Spot Virus. Stemphylium leaf blight is another common fungal disease in humid regions, causing similar leaf damage to purple blotch."
+  },
+  {
+    "id": "storage_spoilage_causes",
+    "topic": "What Causes Onions to Spoil in Storage",
+    "text": "The three main visible spoilage indicators are sprouting (onion begins to grow a new shoot, using up the bulb's stored energy and making it soft), rotting (bacterial or fungal decay, often starting at the neck or base, producing a soft, foul-smelling bulb), and excessive weight loss (moisture loss through the skin causing shriveling). Sprouting is triggered by warm temperatures and length of storage time exceeding the variety's natural dormancy period. Rotting is driven primarily by high humidity and poor curing. Gas-releasing spoilage produces detectable ammonia-like compounds, which is why gas sensors (like the MQ135 used in OnioRakshak) are effective early-warning indicators, often detecting spoilage before it's visible."
+  },
+  {
+    "id": "onion_varieties_india",
+    "topic": "Onion Varieties Grown in India",
+    "text": "Red onions are the most widely grown in India (roughly 90% of production) and include popular cultivars like Nashik Red, Agrifound Dark Red, and Bhima Super, generally offering the best balance of yield, pungency, and storage life. Yellow onions are less common in India but valued for their sweeter flavor. White onions (like Bhima Shubhra, Agrifound White) have a milder taste and are often used for dehydration and export, but tend to have shorter storage life than red varieties due to higher water content and thinner skins. Nashik, Maharashtra, is India's largest onion-producing region, particularly the Lasalgaon area, which hosts one of Asia's largest onion wholesale markets and is often used as the national benchmark for onion prices."
+  },
+  {
+    "id": "market_dynamics",
+    "topic": "Onion Market Dynamics in India",
+    "text": "India has two main onion growing seasons: Rabi (winter-sown, harvested March-May) and Kharif (monsoon-sown, harvested October-December). Rabi onions have better storage quality and dominate supply for most of the year, while Kharif onions are more perishable but fill the gap when Rabi stocks run low. Prices are typically lowest around April-May (Rabi harvest floods the market) and highest around September-October (lean period when old Rabi stock is depleted and new Kharif crop hasn't fully arrived yet). Prices are heavily influenced by arrivals volume (supply) at major mandis (wholesale markets) - more arrivals generally push prices down, and vice versa. Lasalgaon APMC in Maharashtra is widely watched as the price-setting benchmark market for the whole country."
+  },
+  {
+    "id": "nutrition",
+    "topic": "Onion Nutrition",
+    "text": "Onions are low in calories (about 40 kcal per 100g) and contain dietary fiber, vitamin C, vitamin B6, folate, and potassium. They contain organosulfur compounds (like allicin, similar to garlic) which are associated with antioxidant and anti-inflammatory properties in various studies. Onions are also a source of quercetin, a flavonoid antioxidant. Red onions generally contain more antioxidants than white or yellow varieties due to their pigmentation."
+  },
+  {
+    "id": "why_onions_cause_tears",
+    "topic": "Why Cutting Onions Causes Tears",
+    "text": "When an onion is cut, damaged cells release an enzyme (alliinase) that reacts with sulfur compounds in the onion to produce a volatile gas called syn-propanethial-S-oxide. This gas travels through the air and irritates the lacrimal glands in the eyes, triggering a reflex tear response to wash away the irritant. Chilling onions before cutting, using a sharp knife (which damages fewer cells), or cutting near running water/a fan can reduce this effect."
+  },
+  {
+    "id": "cooking_uses",
+    "topic": "Onions in Cooking",
+    "text": "Onions are a foundational aromatic in most Indian cuisine, used as a base for gravies, tempering (tadka), and countless regional dishes. Raw onions (often red) are commonly used in salads and as a garnish for their sharper, pungent flavor. Cooking onions slowly (caramelizing) breaks down their sulfur compounds and converts starches to sugars, producing a sweet, deep flavor used in dishes ranging from biryanis to French onion soup. Onion pastes and powders are also used for extending shelf life and convenience in commercial food production."
+  },
+  {
+    "id": "oniorakshak_project",
+    "topic": "About the OnioRakshak Project",
+    "text": "OnioRakshak is an IoT and machine-learning based system designed to help Maharashtra's onion farmers reduce post-harvest storage losses. It uses ESP32-based sensors (DHT22 for temperature/humidity, MQ135 for gas detection, plus rain and PIR intrusion sensors) to monitor storage conditions in real time. A machine learning model predicts remaining shelf-life in days and classifies storage risk as Safe, Warning, or Critical, automatically triggering actuators (exhaust fan, curtain, buzzer) when conditions worsen. A separate price prediction model forecasts onion market prices to help farmers decide whether to sell now or continue storing. The system is built by a student team at Sanjivani College of Engineering as a final-year project."
+  }
+]
