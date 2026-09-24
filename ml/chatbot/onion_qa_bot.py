@@ -1,12 +1,10 @@
 """
 OnioRakshak - Onion Q&A Chatbot (Gemini-powered, domain-restricted,
-multilingual, voice-enabled)
+multilingual, voice-enabled, RAG-grounded)
 
-Answers open-ended onion-related questions using the Gemini API, while
-declining anything unrelated to onions. Falls back to the rule-based bot
-(bot.py) first for the small set of questions specific to THIS project's
-dashboard/status logic, since that's instant, free, and more precise for
-those particular questions than a general LLM would be.
+Answers open-ended onion-related questions using the Gemini API, grounded
+in a curated knowledge base via retrieval-augmented generation (RAG),
+while declining anything unrelated to onions.
 
 Multilingual: responds in whatever language the farmer asks in (English,
 Hindi, Marathi, or others) — Gemini handles this natively; we just
@@ -21,6 +19,10 @@ Voice output: converts the text reply to speech via gTTS. Checked at
 runtime against gTTS's actual supported-language list (not assumed) —
 falls back to Hindi, then English, if the detected language isn't
 available as a TTS voice.
+
+Resilience: Gemini calls retry with exponential backoff (1s, 2s, 4s) on
+transient errors (e.g. 503 "high demand"), since free-tier API access
+can hit these fairly often.
 
 Setup:
     1. Get a free API key at https://aistudio.google.com/apikey
@@ -39,6 +41,7 @@ Usage (as a module):
 """
 
 import os
+import time
 
 from dotenv import load_dotenv
 from google import genai
@@ -50,7 +53,7 @@ from rag_pipeline import OnionKnowledgeBase
 
 load_dotenv()  # reads .env in this folder if present; harmless if it doesn't exist
 
-MODEL_NAME = "gemini-flash-latest"
+MODEL_NAME = "gemini-flash-lite-latest"
 
 SYSTEM_INSTRUCTION = """\
 You are the OnioRakshak onion assistant, used by farmers in Maharashtra,
@@ -104,10 +107,10 @@ class OnionQABot:
             self.knowledge_base = OnionKnowledgeBase(api_key=api_key)
             self.knowledge_base.build_index()  # loads from disk if already built
 
-    def ask(self, user_message: str) -> str:
-        """Text-in, text-out. Responds in whatever language the message is in."""
+    def _build_prompt(self, user_message: str) -> str:
+        """Builds the prompt, injecting retrieved reference material from
+        the knowledge base when relevant chunks are found."""
         prompt = user_message
-
         if self.use_rag:
             retrieved = self.knowledge_base.retrieve(user_message, top_k=3)
             # Only use chunks that are actually relevant (similarity above
@@ -122,44 +125,64 @@ class OnionQABot:
                     f"Reference material:\n{reference_block}\n\n"
                     f"Question: {user_message}"
                 )
+        return prompt
 
-        response = self.client.models.generate_content(
-            model=MODEL_NAME,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_INSTRUCTION,
-                temperature=0.4,
-                max_output_tokens=300,
-            ),
-        )
-        return response.text.strip()
+    def ask(self, user_message: str, max_retries: int = 3) -> str:
+        """Text-in, text-out. Responds in whatever language the message is
+        in, grounded in retrieved knowledge base context when relevant.
+        Retries with exponential backoff on transient Gemini errors."""
+        prompt = self._build_prompt(user_message)
 
-    def ask_audio(self, audio_path: str) -> str:
+        for attempt in range(max_retries):
+            try:
+                response = self.client.models.generate_content(
+                    model=MODEL_NAME,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        system_instruction=SYSTEM_INSTRUCTION,
+                        temperature=0.4,
+                        max_output_tokens=300,
+                    ),
+                )
+                return response.text.strip()
+            except Exception:
+                if attempt < max_retries - 1:
+                    wait = 2 ** attempt  # 1s, then 2s
+                    print(f"  (Gemini busy, retrying in {wait}s...)")
+                    time.sleep(wait)
+                else:
+                    raise
+
+    def ask_audio(self, audio_path: str, max_retries: int = 3) -> str:
         """Voice-in, text-out. Gemini transcribes and answers in one call,
-        replying in whatever language the speaker used.
-
-        Note: the rule-based fast-path is intentionally skipped here,
-        since we don't have transcribed text to match keywords against
-        without an extra call — the audio goes straight to Gemini, which
-        can both transcribe and reason about the question in one pass.
-        """
+        replying in whatever language the speaker used. Retries with
+        exponential backoff on transient Gemini errors."""
         mime_type = self._guess_audio_mime_type(audio_path)
         with open(audio_path, "rb") as f:
             audio_bytes = f.read()
 
-        response = self.client.models.generate_content(
-            model=MODEL_NAME,
-            contents=[
-                types.Part.from_bytes(data=audio_bytes, mime_type=mime_type),
-                "Answer the onion-related question asked in this audio clip.",
-            ],
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_INSTRUCTION,
-                temperature=0.4,
-                max_output_tokens=300,
-            ),
-        )
-        return response.text.strip()
+        for attempt in range(max_retries):
+            try:
+                response = self.client.models.generate_content(
+                    model=MODEL_NAME,
+                    contents=[
+                        types.Part.from_bytes(data=audio_bytes, mime_type=mime_type),
+                        "Answer the onion-related question asked in this audio clip.",
+                    ],
+                    config=types.GenerateContentConfig(
+                        system_instruction=SYSTEM_INSTRUCTION,
+                        temperature=0.4,
+                        max_output_tokens=300,
+                    ),
+                )
+                return response.text.strip()
+            except Exception:
+                if attempt < max_retries - 1:
+                    wait = 2 ** attempt
+                    print(f"  (Gemini busy, retrying in {wait}s...)")
+                    time.sleep(wait)
+                else:
+                    raise
 
     def speak(self, text: str, lang_hint: str = "en", output_path: str = "response.mp3") -> str:
         """Text-to-speech. lang_hint should be a language code ('en',
@@ -192,7 +215,7 @@ class OnionQABot:
             ".flac": "audio/flac",
         }.get(ext, "audio/wav")
 
-  
+
 def main():
     print("OnioRakshak Onion Assistant (Gemini-powered, multilingual). Type 'exit' to quit.\n")
     bot = OnionQABot()
@@ -209,4 +232,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
