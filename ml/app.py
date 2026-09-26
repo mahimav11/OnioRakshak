@@ -30,6 +30,12 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
+from langdetect import DetectorFactory, LangDetectException, detect
+
+# langdetect's default behavior is non-deterministic across runs unless
+# seeded (it uses a probabilistic n-gram model internally) — fix the seed
+# so the same text always gets the same detected language.
+DetectorFactory.seed = 0
 
 # ---------------------------------------------------------------------------
 # Paths — resolved as absolutes up front, since the chatbot module needs its
@@ -148,9 +154,24 @@ def forecast_forward(pipeline, history_df, market, variety, days_ahead=14):
 
 
 def guess_tts_lang(text: str) -> str:
-    """Very rough heuristic: Devanagari script present -> Hindi voice,
-    otherwise English. Good enough for a 'Listen' button, not a real
-    language classifier."""
+    """Detects Hindi vs Marathi vs English so the 'Listen' button uses the
+    right gTTS voice. langdetect can tell Hindi and Marathi apart (unlike
+    a plain Devanagari-script check, which can't — they share a script),
+    though it isn't perfect on short text. Falls back to a Devanagari
+    check (defaulting to Hindi) if detection fails or returns something
+    gTTS doesn't support; OnionQABot.speak() has its own fallback chain
+    on top of this as a final safety net."""
+    try:
+        detected = detect(text)
+    except LangDetectException:
+        detected = None
+
+    if detected in ("hi", "mr", "en"):
+        return detected
+
+    # langdetect doesn't know Marathi as well as Hindi on short strings and
+    # can misfire — fall back to a script check rather than trust an
+    # unexpected code (e.g. it occasionally returns 'ne' for Devanagari text).
     if re.search(r"[\u0900-\u097F]", text):
         return "hi"
     return "en"
@@ -555,16 +576,36 @@ with tab_chat:
             st.markdown(render_messages(), unsafe_allow_html=True)
 
         # --- Voice input ---
-        with st.expander("🎙️ Or ask by voice"):
-            audio_file = st.file_uploader(
-                "Upload a short voice clip (wav, mp3, m4a, ogg)",
-                type=["wav", "mp3", "m4a", "ogg"],
-                key="rk_audio_upload",
-            )
-            if audio_file is not None and st.button("Send voice question", key="rk_send_voice"):
-                temp_audio_path = BASE_DIR / f"_tmp_voice_input{Path(audio_file.name).suffix}"
+        # Prefer live mic recording (st.audio_input, Streamlit >= 1.38). On
+        # older Streamlit versions where it doesn't exist, fall back to a
+        # file uploader so voice input still works either way.
+        with st.expander("🎙️ Or ask by voice", expanded=False):
+            recorded_audio = None
+            uploaded_audio = None
+            audio_suffix = ".wav"
+
+            if hasattr(st, "audio_input"):
+                recorded_audio = st.audio_input("Record your question", key="rk_audio_record")
+            else:
+                st.caption(
+                    "Live recording needs Streamlit 1.38+. Run "
+                    "`pip install -U streamlit` to enable it — using file "
+                    "upload for now."
+                )
+                uploaded_audio = st.file_uploader(
+                    "Upload a short voice clip (wav, mp3, m4a, ogg)",
+                    type=["wav", "mp3", "m4a", "ogg"],
+                    key="rk_audio_upload",
+                )
+                if uploaded_audio is not None:
+                    audio_suffix = Path(uploaded_audio.name).suffix or ".wav"
+
+            audio_data = recorded_audio or uploaded_audio
+
+            if audio_data is not None and st.button("Send voice question", key="rk_send_voice"):
+                temp_audio_path = BASE_DIR / f"_tmp_voice_input{audio_suffix}"
                 with open(temp_audio_path, "wb") as f:
-                    f.write(audio_file.getbuffer())
+                    f.write(audio_data.getbuffer())
                 st.session_state.rk_messages.append({"role": "user", "content": "🎙️ (voice question)"})
                 with st.spinner("Rakshak is listening..."):
                     try:
