@@ -1,0 +1,17 @@
+# OnioRakshak — top-level app requirements
+# Install into a fresh venv from ml/: pip install -r requirements.txt
+
+streamlit>=1.38
+pandas
+numpy
+scikit-learn
+joblib
+plotly
+
+# Rakshak chatbot dependencies (same as chatbot/requirements.txt —
+# duplicated here so a single `pip install -r requirements.txt` from ml/
+# sets up everything the app needs, models and chatbot included)
+python-dotenv
+google-genai
+gtts
+faiss-cpu
