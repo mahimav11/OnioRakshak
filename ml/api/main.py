@@ -15,6 +15,8 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
+from .chat import bot_ready, init_bot, router as chat_router
+
 ML_DIR = Path(__file__).resolve().parent.parent
 MODEL_DIR = ML_DIR / "models"
 DATA_DIR = ML_DIR / "data"
@@ -58,11 +60,14 @@ async def lifespan(app: FastAPI):
         c: (float(health_df[c].min()), float(health_df[c].max()))
         for c in HEALTH_NUMERIC
     }
+    init_bot()  # chatbot is optional: the API still starts if it can't load
     yield
     state.clear()
 
 
-app = FastAPI(title="OnioRakshak API", version="0.1.0", lifespan=lifespan)
+app = FastAPI(title="OnioRakshak API", version="0.2.0", lifespan=lifespan)
+
+app.include_router(chat_router)
 
 app.add_middleware(
     CORSMiddleware,
@@ -158,7 +163,7 @@ class StorageHealthResponse(BaseModel):
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "chatbot": bot_ready()}
 
 
 @app.get("/meta")
