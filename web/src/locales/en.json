@@ -1,0 +1,29 @@
+{
+  "app": {
+    "tagline": "Onion storage and market help for Maharashtra farmers"
+  },
+  "lang": { "label": "Language" },
+  "nav": {
+    "home": "Home",
+    "price": "Price forecast",
+    "health": "Storage health",
+    "chat": "Ask Rakshak",
+    "menu": "Main menu"
+  },
+  "home": {
+    "title": "Keep your onions safe, sell at the right time",
+    "intro": "See where onion prices are heading, check how your stored onions are doing, or ask Rakshak a question.",
+    "price": "A 14-day price outlook for Maharashtra markets",
+    "health": "Risk level and days of shelf life left for a batch",
+    "chat": "Ask about storage, diseases or prices in your own language"
+  },
+  "status": {
+    "checking": "Checking the server...",
+    "online": "Server connected",
+    "offline": "Server not reachable",
+    "offlineHelp": "Start the API from the ml folder: uvicorn api.main:app --port 8000",
+    "chatReady": "Rakshak is ready",
+    "chatOff": "Rakshak is not available"
+  },
+  "soon": "This page is being built."
+}
