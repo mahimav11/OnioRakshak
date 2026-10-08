@@ -1,18 +1,26 @@
-// EDIT THESE to match your FastAPI routes (open http://localhost:8000/docs to see them).
-export const BASE = import.meta.env.VITE_API_BASE ?? '/api'
-export const EP = { forecast: '/forecast', risk: '/storage/risk', chat: '/chat' }
-export const MARKETS = ['Lasalgaon', 'Pimpalgaon', 'Pune', 'Solapur']
-export const VARIETIES = ['Red', 'White', 'Local']
+import { useEffect, useState } from 'react'
 
-export async function call(path, { method = 'GET', body, params } = {}) {
-  const q = params ? '?' + new URLSearchParams(params) : ''
-  const r = await fetch(BASE + path + q, {
-    method, headers: body ? { 'Content-Type': 'application/json' } : undefined,
+export const BASE = import.meta.env.VITE_API_BASE ?? '/api'
+// Chat router prefix: if /api/chat gives 404, check APIRouter(prefix=...) in ml/api/chat.py and edit here.
+export const EP = { meta: '/meta', price: '/predict/price', risk: '/predict/storage-health', chat: '/chat' }
+
+export async function call(path, body) {
+  const r = await fetch(BASE + path, {
+    method: body ? 'POST' : 'GET',
+    headers: body ? { 'Content-Type': 'application/json' } : undefined,
     body: body ? JSON.stringify(body) : undefined,
   })
-  if (!r.ok) throw new Error(r.status)
+  if (!r.ok) {
+    let d = ''
+    try { const j = await r.json(); d = typeof j.detail === 'string' ? j.detail : JSON.stringify(j.detail ?? j) } catch { /* no body */ }
+    throw new Error(`${r.status} ${d}`.trim())
+  }
   return r.json()
 }
-// Tolerant readers: accept several common key names from the API.
-export const pick = (o, keys, d) => { for (const k of keys) if (o?.[k] != null) return o[k]; return d }
-export const series = (a = []) => a.map((p) => ({ d: pick(p, ['date', 'ds', 'day'], ''), v: +pick(p, ['price', 'yhat', 'value', 'modal_price'], 0) }))
+
+export function useMeta() {
+  const [meta, setMeta] = useState(null)
+  const [err, setErr] = useState('')
+  useEffect(() => { call(EP.meta).then(setMeta).catch((e) => setErr(e.message)) }, [])
+  return { meta, err }
+}

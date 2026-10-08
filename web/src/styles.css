@@ -60,3 +60,9 @@ select,.composer input{background:#12171d;color:var(--paper);border:1px solid va
 .log{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:12px;padding:6px 0}
 .bub{max-width:min(560px,85%);padding:12px 16px;border-radius:12px;white-space:pre-wrap}.bub.bot{background:var(--panel);border:1px solid var(--line)}.bub.me{align-self:flex-end;background:var(--teal);color:#0B0E12}.bub.err{border-color:var(--alert);color:var(--alert)}
 .composer{display:flex;gap:10px;margin-top:14px}.composer input{flex:1}
+.note.err{color:var(--alert);word-break:break-word}
+fieldset{border:1px solid var(--line);border-radius:8px;margin:0 0 18px;padding:14px 18px 2px}legend{padding:0 8px;color:var(--teal);font-size:.85rem}
+.pickers input[type=range]{min-width:180px;accent-color:var(--teal)}
+.result .verdict{font:700 1.4rem var(--display);text-transform:capitalize;margin-top:0}
+.bar{display:grid;grid-template-columns:90px 1fr 44px;align-items:center;gap:10px;margin:6px 0;font-size:.85rem}.bar i{display:block;height:8px;border-radius:4px;background:var(--teal)}.bar em{font-style:normal;color:var(--dim);text-align:right}
+.warns{margin:14px 0 0;padding-left:18px;color:var(--copper)}
