@@ -219,3 +219,5 @@ __marimo__/
 onio-chatbot-env/
 *.faiss
 onion_kb_metadata.json*.mp3
+ml/chatbot/*.mp3
+ml/chatbot/onion_kb_metadata.json
